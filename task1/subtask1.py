@@ -26,7 +26,7 @@ def intersection_over_union(ground_truth_p1, ground_truth_p2, detected_p1, detec
 
 # Main
 
-image_name = "dart5.jpg"
+image_name = "dart15.jpg"
 image_path = "in/{}".format(image_name)
 image = cv2.imread(image_path)
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -34,12 +34,12 @@ gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 images_to_faces = load_ground_truth("faces.json")
 ground_truth_faces = images_to_faces[image_name]
 number_of_faces = len(ground_truth_faces)
-print("Number of faces: ", number_of_faces)
+print("Number of faces:", number_of_faces)
 
 face_cascade = cv2.CascadeClassifier('frontalface.xml')
-detected_faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+detected_faces = face_cascade.detectMultiScale(gray, 1.1, 1, 0, (50, 50), (500, 500))
 number_of_detections = len(detected_faces)
-print("Number of detections: ", number_of_detections)
+print("Number of detections:", number_of_detections)
 
 for faces_coordinates in ground_truth_faces:
   x1 = faces_coordinates[0]
@@ -68,14 +68,19 @@ for face_coordinate in ground_truth_faces:
     if(iou >= threshold):
       succeded_detections += 1
 
-print("Number of successes: ", succeded_detections)
-print("True Positive Rate: {} / {} = ".format(succeded_detections, number_of_faces),
-  succeded_detections / number_of_faces)
+print("True Positives:", succeded_detections)
+false_positives = number_of_detections - succeded_detections
+print("False Positives:", false_positives)
+recall = succeded_detections / number_of_faces # Also called sensitivity and recall
+print("True Positive Rate: {} / {} = ".format(succeded_detections, number_of_faces), recall) 
+precision = succeded_detections / (succeded_detections + false_positives)  # Also called Positive Predictive Value (PPV)
+print("Precision:", precision)
+f1 = (2 * (recall * precision)) / (recall + precision)
+print("F1:", f1)
 
-# img = cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
-
-# cv2.imshow('img', image)
 labeled_file_name = image_name.replace("dart", "out/labeled")
 cv2.imwrite(labeled_file_name, image)
+
+# cv2.imshow('img', image)
 # cv2.waitKey(0)
 # cv2.destroyAllWindows()
