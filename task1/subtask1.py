@@ -1,5 +1,5 @@
 import cv2
-import json 
+import json
 
 def load_ground_truth(ground_truth_file):
   json_string = open(ground_truth_file).read()
@@ -23,6 +23,12 @@ def intersection_over_union(ground_truth_p1, ground_truth_p2, detected_p1, detec
     intersection_area = 0
   union_area = ground_truth_area + detected_area - intersection_area
   return intersection_area / union_area
+
+def show_image(image, title="Image"):
+  cv2.imshow(title, image)
+  cv2.moveWindow(title, 0, 20);
+  cv2.waitKey()
+  cv2.destroyAllWindows()
 
 # Main
 
@@ -48,7 +54,6 @@ for faces_coordinates in ground_truth_faces:
   y2 = faces_coordinates[3]
   image = cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
-faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 for (x, y, w, h) in detected_faces:
   image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
@@ -81,6 +86,4 @@ print("F1:", f1)
 labeled_file_name = image_name.replace("dart", "out/labeled")
 cv2.imwrite(labeled_file_name, image)
 
-# cv2.imshow('img', image)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
+# show_image(image)
