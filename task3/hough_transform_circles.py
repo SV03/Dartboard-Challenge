@@ -14,7 +14,7 @@ class HoughTransformCircles(object):
   def process(self, threshold = 250, min_radius = 20, max_radius = 145):
     possible_radious = max_radius - min_radius
     h_space_padding = 140
-    h_space = np.zeros([1000, 1000, possible_radious])
+    h_space = np.zeros([1500, 1500, possible_radious])
     min_x = 99999; max_x = -99999
     min_y = 99999; max_y =-99999
     for row in range (self.direction.shape[0]):
@@ -23,13 +23,20 @@ class HoughTransformCircles(object):
           for r in range (possible_radious):
             radius = min_radius + r
             direction_in_radians = (self.direction[row][col] * 2 * np.pi) / 255
-            x0 = col - radius * math.cos(direction_in_radians)
-            y0 = row - radius * math.sin(direction_in_radians)
-            if (x0 > max_x): max_x = x0
-            if (x0 < min_x): min_x = x0
-            if (y0 > max_y): max_y = y0
-            if (y0 < min_y): min_y = y0
+            a = radius * math.cos(direction_in_radians)
+            b = radius * math.sin(direction_in_radians)
+          
+            x0 = col - a
+            y0 = row - b
             h_space[int(x0 + h_space_padding)][int(y0 + h_space_padding)][int(r)] += 1
+            if (x0 < min_x): min_x = x0
+            if (y0 < min_y): min_y = y0
+
+            x0 = col + a
+            y0 = row + b
+            h_space[int(x0 + h_space_padding)][int(y0 + h_space_padding)][int(r)] += 1
+            if (x0 > max_x): max_x = x0
+            if (y0 > max_y): max_y = y0
     print("Max X", max_x)
     print("Min X", min_x)
     print("Max Y", max_y)
@@ -38,10 +45,10 @@ class HoughTransformCircles(object):
     print("Width:",h_space_width)
     h_space_height  = int(-min_y + max_y)
     print("Height:",h_space_height)
-    return np.sum(h_space, axis=2) * 5
+    return np.sum(h_space, axis=2) * 3
 
 if __name__ == "__main__":
-  file_number = 3
+  file_number = 14
 
   grad_magnitude = cv2.imread(f'out/edges{file_number}.jpg')
   gray_magnitude = cv2.cvtColor(grad_magnitude, cv2.COLOR_BGR2GRAY)
