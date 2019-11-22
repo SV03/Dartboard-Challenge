@@ -42,3 +42,25 @@ def segment_by_threshold(image, threshold):
 def normalize(image, min_value, max_value):
   normalized = np.empty(image.shape)
   return cv2.normalize(image, normalized, min_value, max_value, cv2.NORM_MINMAX)
+
+def image_bounds(image, pixel_value):
+  width = np.size(image, 0); height = np.size(image,1)
+  pixel_bound_x = pixel_value ; pixel_bound_y = pixel_value; scale_percent = 1
+
+  if (width > pixel_bound_x or height > pixel_bound_y):
+    ratioX = (pixel_bound_x/width)
+    ratioY = (pixel_bound_y/height)
+    if (width > height):
+      scale_percent = ratioX
+    else: 
+      scale_percent = ratioY
+
+  width = int(image.shape[1] * scale_percent)
+  print("New width:", width)
+  height = int(image.shape[0] * scale_percent)
+  print("New height:", height)
+
+  dim = (width, height)
+  resized_gray = cv2.resize(image, dim, cv2.INTER_AREA)
+
+  return resized_gray
