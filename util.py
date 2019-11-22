@@ -23,7 +23,7 @@ def intersection_over_union(ground_truth_p1, ground_truth_p2, detected_p1, detec
 def show_image(image, title="Image"):
   cv2.imshow(title, image)
   cv2.moveWindow(title, 0, 20);
-  cv2.waitKey()
+  cv2.waitKey(0)
   cv2.destroyAllWindows()
 
 def load_ground_truth(ground_truth_file):
