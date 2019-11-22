@@ -1,5 +1,6 @@
 import cv2
 import json
+import numpy as np
 
 def rectangle_area(p1, p2):
   return (p2[0] - p1[0] + 1) * (p2[1] - p1[1] + 1)
@@ -29,3 +30,15 @@ def show_image(image, title="Image"):
 def load_ground_truth(ground_truth_file):
   json_string = open(ground_truth_file).read()
   return json.loads(json_string)
+
+def segment_by_threshold(image, threshold):
+  result = np.empty(image.shape)
+  for row in range(image.shape[0]):
+    for col in range(image.shape[1]):
+      if image[row, col] >= threshold:
+        result[row, col] = image[row, col]
+  return result
+
+def normalize(image, min_value, max_value):
+  normalized = np.empty(image.shape)
+  return cv2.normalize(image, normalized, min_value, max_value, cv2.NORM_MINMAX)
