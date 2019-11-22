@@ -31,7 +31,7 @@ class HoughTransformLines(object):
 
 if __name__ == "__main__":
   file_number = 0
-  grad_magnitude = cv2.imread(f'out/segmented{file_number}.jpg')
+  grad_magnitude = cv2.imread(f'out/edges{file_number}.jpg')
   gray_grad_magnitude = cv2.cvtColor(grad_magnitude, cv2.COLOR_BGR2GRAY)
   
   htl = HoughTransformLines(gray_grad_magnitude)
