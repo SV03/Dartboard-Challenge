@@ -14,26 +14,22 @@ def segment_by_threshold(image, threshold):
         result[row, col] = image[row, col]
   return result
 
-def image_bounds(image, pixel_value):
-  width = np.size(image, 0); height = np.size(image, 1)
-  pixel_bound_x = pixel_value ; pixel_bound_y = pixel_value; scale_percent = 1
+def resize_with_aspect_ratio(image, max_side):
+  width = np.size(image, 0); height = np.size(image,1)
+  pixel_bound_x = max_side ; pixel_bound_y = max_side; scale_percent = 1
 
   if (width > pixel_bound_x or height > pixel_bound_y):
-    ratioX = (pixel_bound_x/width)
-    ratioY = (pixel_bound_y/height)
+    ratioX = (pixel_bound_x / width)
+    ratioY = (pixel_bound_y / height)
     if (width > height):
       scale_percent = ratioX
-    else:
+    else: 
       scale_percent = ratioY
 
   width = int(image.shape[1] * scale_percent)
-  print("New width:", width)
   height = int(image.shape[0] * scale_percent)
-  print("New height:", height)
-
-  dim = (width, height)
-  resized_gray = cv2.resize(image, dim, cv2.INTER_AREA)
-  return resized_gray
+  new_dim = (width, height)
+  return cv2.resize(image, new_dim, cv2.INTER_AREA)
 
 def gradient_direction(image):
   direction = np.empty(image.shape)
