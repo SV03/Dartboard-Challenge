@@ -41,5 +41,11 @@ def gradient_direction(image):
   # return direction
   return normalize(direction, 0, 255)
 
-def edges(image):
-  return cv2.Laplacian(image, cv2.CV_64F, ksize=3)
+def gradient_magnitude(image):
+  magnitude = np.empty(image.shape)
+  gradient_x = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=3)
+  gradient_y = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3)
+  for row in range(image.shape[0]):
+    for col in range(image.shape[1]):
+      magnitude[row, col] = math.sqrt(gradient_y[row, col]**2 + gradient_x[row, col]**2)
+  return normalize(magnitude, 0, 255)

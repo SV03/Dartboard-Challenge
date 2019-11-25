@@ -46,17 +46,22 @@ if __name__ == "__main__":
   image_path = sys.argv[1]
   image_name = image_path.split('/')[-1]
   print(f"Opening {image_name}")
+
   image = cv2.imread(image_path)
-  image = ip.resize_with_aspect_ratio(image, max_side=250)
-  # cv2.imwrite(f'preprocess/edge_{image_name}', grad_magnitude)
+  # image = ip.resize_with_aspect_ratio(image, max_side=100)
   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-  edges = ip.edges(gray)
-  grad_magnitude = ip.segment_by_threshold(edges, threshold=255)
-  # cv2.imwrite(f'preprocess/edge_{image_name}', grad_magnitude)
+  edges = ip.gradient_magnitude(gray)
+  cv2.imwrite(f'preprocess/edge_{image_name}', edges)
+  
+  # edges = ip.normalize(edges, 0, 255)
+  # cv2.imwrite(f'preprocess/edge_norm_{image_name}', edges)
 
-  grad_direction = ip.gradient_direction(gray)
-  # cv2.imwrite(f'preprocess/dir_{image_name}', direction)
+  grad_magnitude = ip.segment_by_threshold(edges, threshold=250)
+  cv2.imwrite(f'preprocess/edge_thr_{image_name}', grad_magnitude)
+
+  # grad_direction = ip.gradient_direction(gray)
+  # cv2.imwrite(f'preprocess/dir_{image_name}', grad_direction)
 
   # htc = HoughTransformCircles(grad_magnitude, grad_direction)
 
@@ -67,6 +72,6 @@ if __name__ == "__main__":
   # # h_space = util.segment_by_threshold(h_space, 50)
 
   # cv2.imwrite(f'h_space/circles{file_number}.jpg', h_space_2d)
-  util.show_image(image)
+  # util.show_image(edges)
 
 
