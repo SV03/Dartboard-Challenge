@@ -3,8 +3,10 @@ import numpy as np
 import sys
 import os
 import math
-# PARENT_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# sys.path.append(PARENT_PATH); import util
+PARENT_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(PARENT_PATH); 
+import util
+import image_processing as ip
 
 class HoughTransformCircles(object):
   def __init__(self, magnitude, direction):
@@ -41,23 +43,26 @@ class HoughTransformCircles(object):
     return np.sum(self.h_space, axis=2) * scale
 
 if __name__ == "__main__":
-  file_number = 10
+  image_path = sys.argv[1]
+  image_name = image_path.split('/')[-1]
+  print(f"Opening {image_name}")
+  image = cv2.imread(image_path)
+  gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-  grad_magnitude = cv2.imread(f'out/edges{file_number}.jpg')
-  gray_magnitude = cv2.cvtColor(grad_magnitude, cv2.COLOR_BGR2GRAY)
+  edges = ip.segment_by_threshold(ip.edges(gray), threshold=250)
+  # cv2.imwrite(f'preprocess/edge_{image_name}', edges)
+  direction = ip.gradient_direction(gray)
+  # cv2.imwrite(f'preprocess/dir_{image_name}', direction)
 
-  grad_direction = cv2.imread(f'out/gradient_dir{file_number}.jpg')
-  gray_direction = cv2.cvtColor(grad_direction, cv2.COLOR_BGR2GRAY)
+  # htc = HoughTransformCircles(gray_magnitude, gray_direction)
 
-  htc = HoughTransformCircles(gray_magnitude, gray_direction)
+  # h_space = htc.process_space(threshold=253, min_radius=20, max_radius=150)
+  # h_space_2d = htc.squash_space(scale=5)
 
-  h_space = htc.process_space(threshold=253, min_radius=20, max_radius=150)
-  h_space_2d = htc.squash_space(scale=5)
+  # # h_space = util.normalize(h_space, 0, 255)
+  # # h_space = util.segment_by_threshold(h_space, 50)
 
-  # h_space = util.normalize(h_space, 0, 255)
-  # h_space = util.segment_by_threshold(h_space, 50)
-
-  cv2.imwrite(f'h_space/circles{file_number}.jpg', h_space_2d)
-  # util.show_image(grad_magnitude)
+  # cv2.imwrite(f'h_space/circles{file_number}.jpg', h_space_2d)
+  util.show_image(direction)
 
 
