@@ -2,6 +2,9 @@ import cv2
 import json
 import numpy as np
 
+def abs(n):
+  return n if n >= 0 else -n
+
 def rectangle_area(p1, p2):
   return (p2[0] - p1[0] + 1) * (p2[1] - p1[1] + 1)
 

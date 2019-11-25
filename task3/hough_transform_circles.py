@@ -9,20 +9,22 @@ import util
 import image_processing as ip
 
 class HoughTransformCircles(object):
-  def __init__(self, magnitude, direction):
+  def __init__(self, magnitude, direction, min_radius, max_radius):
     self.magnitude = magnitude
     self.direction = direction
+    self.min_radius = min_radius
+    self.max_radius = max_radius
     self.height = magnitude.shape[0]
     self.width = magnitude.shape[1]
 
-  def process_space(self, threshold, min_radius, max_radius):
-    possible_radious = max_radius - min_radius
+  def process_space(self, threshold):
+    possible_radious = self.max_radius - self.min_radius
     h_space = np.zeros([self.height, self.width, possible_radious])
     for row in range(self.height):
       for col in range (self.width):
         if self.magnitude[row][col] > threshold:
           for r in range (possible_radious):
-            radius = int(min_radius + r)
+            radius = int(self.min_radius + r)
             direction_in_radians = (self.direction[row][col] * 2 * np.pi) / 255
             a = int(radius * math.cos(direction_in_radians))
             b = int(radius * math.sin(direction_in_radians))
@@ -42,10 +44,18 @@ class HoughTransformCircles(object):
   def squash_space(self, scale):
     return np.sum(self.h_space, axis=2) * scale
 
-  def detect_circles(self, threshold=20):
-    maximum_value = np.max(self.h_space)
-    print("maximum_value", maximum_value)
-    return []
+  def detect_circles(self, threshold=25):
+    detections = []; circles = []
+    for row in range(self.h_space.shape[0]):
+      for col in range(self.h_space.shape[1]):
+        for r_index in range(self.h_space.shape[2]):
+          if (self.h_space[row, col, r_index] >= threshold):
+            radius = r_index + self.min_radius
+            detections.append((row, col, radius))
+    for row, col, radius in detections:
+      if all( abs(radius - c_rad) > 12 for c_row, c_col, c_rad in circles):
+        circles.append((row, col, radius))
+    return circles
 
 if __name__ == "__main__":
   image_path = sys.argv[1]
@@ -66,16 +76,17 @@ if __name__ == "__main__":
   grad_direction = ip.gradient_direction(gray)
   cv2.imwrite(f'preprocess/dir_{image_name}', grad_direction)
 
-  htc = HoughTransformCircles(gradient, grad_direction)
+  htc = HoughTransformCircles(gradient, grad_direction, min_radius=30, max_radius=150)
 
-  h_space = htc.process_space(threshold=threshold, min_radius=27, max_radius=100)
+  h_space = htc.process_space(threshold=threshold)
   h_space_2d = htc.squash_space(scale=1)
   
-  circles = htc.detect_circles()
-  print("Detections:", len(circles))
-  print(circles)
+  circles = htc.detect_circles(threshold=20)
+  for row, col, radius in circles:
+    p0 = (col - radius, row - radius)
+    p1 = (col + radius, row + radius)
+    image = cv2.rectangle(image, p0, p1, (0, 255, 0), 1)
 
-  cv2.imwrite(f'h_space/circles_{image_name}', h_space_2d)
-  # util.show_image(h_space_2d)
-
-
+  # cv2.imwrite(f'h_space/circles_{image_name}', h_space_2d)
+  cv2.imwrite(f'out/circles_{image_name}', image)
+  util.show_image(image)
