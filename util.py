@@ -68,7 +68,12 @@ def image_bounds(image, pixel_value):
 
   return resized_gray
 
-def viola_jones_cascade(image_name,image,resized_gray):
+def viola_jones_detection(cascade_file, gray_image):
+  cascade_classifier = cv2.CascadeClassifier(cascade_file)
+  return cascade_classifier.detectMultiScale(gray_image, 1.1, 2, 0, (50, 50), (500, 500))
+
+def viola_jones_cascade(cascade_file, image_name,image,resized_gray):
+
   #Multicascade  Detection
   images_to_dartboards = load_ground_truth("../task2/dartboards.json")
   ground_truth_dartboards = images_to_dartboards[image_name]
