@@ -26,7 +26,7 @@ class HoughTransformCircles(object):
             direction_in_radians = (self.direction[row][col] * 2 * np.pi) / 255
             a = int(radius * math.cos(direction_in_radians))
             b = int(radius * math.sin(direction_in_radians))
-            
+
             y0 = row - b
             x0 = col - a
             if (y0 >= 0 and x0 >= 0 and y0 < self.height and x0 < self.width):
@@ -34,13 +34,18 @@ class HoughTransformCircles(object):
 
             y0 = row + b
             x0 = col + a
-            if (y0 < self.height and x0 < self.width):
+            if (y0 >= 0 and x0 >= 0 and y0 < self.height and x0 < self.width):
               h_space[y0][x0][r] += 1
     self.h_space = h_space
     return self.h_space
   
-  def squash_space(self, scale=1):
+  def squash_space(self, scale):
     return np.sum(self.h_space, axis=2) * scale
+
+  def detect_circles(self, threshold=20):
+    maximum_value = np.max(self.h_space)
+    print("maximum_value", maximum_value)
+    return []
 
 if __name__ == "__main__":
   image_path = sys.argv[1]
@@ -48,30 +53,29 @@ if __name__ == "__main__":
   print(f"Opening {image_name}")
 
   image = cv2.imread(image_path)
-  # image = ip.resize_with_aspect_ratio(image, max_side=100)
+  image = ip.resize_with_aspect_ratio(image, max_side=150)
   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
   edges = ip.gradient_magnitude(gray)
-  cv2.imwrite(f'preprocess/edge_{image_name}', edges)
+  # cv2.imwrite(f'preprocess/grad_{image_name}', edges)
+
+  threshold = 80
+  gradient = ip.segment_by_threshold(edges, threshold=threshold)
+  cv2.imwrite(f'preprocess/grad_thre{image_name}', gradient)
+
+  grad_direction = ip.gradient_direction(gray)
+  cv2.imwrite(f'preprocess/dir_{image_name}', grad_direction)
+
+  htc = HoughTransformCircles(gradient, grad_direction)
+
+  h_space = htc.process_space(threshold=threshold, min_radius=27, max_radius=100)
+  h_space_2d = htc.squash_space(scale=1)
   
-  # edges = ip.normalize(edges, 0, 255)
-  # cv2.imwrite(f'preprocess/edge_norm_{image_name}', edges)
+  circles = htc.detect_circles()
+  print("Detections:", len(circles))
+  print(circles)
 
-  grad_magnitude = ip.segment_by_threshold(edges, threshold=250)
-  cv2.imwrite(f'preprocess/edge_thr_{image_name}', grad_magnitude)
-
-  # grad_direction = ip.gradient_direction(gray)
-  # cv2.imwrite(f'preprocess/dir_{image_name}', grad_direction)
-
-  # htc = HoughTransformCircles(grad_magnitude, grad_direction)
-
-  # h_space = htc.process_space(threshold=253, min_radius=20, max_radius=150)
-  # h_space_2d = htc.squash_space(scale=5)
-
-  # # h_space = util.normalize(h_space, 0, 255)
-  # # h_space = util.segment_by_threshold(h_space, 50)
-
-  # cv2.imwrite(f'h_space/circles{file_number}.jpg', h_space_2d)
-  # util.show_image(edges)
+  cv2.imwrite(f'h_space/circles_{image_name}', h_space_2d)
+  # util.show_image(h_space_2d)
 
 

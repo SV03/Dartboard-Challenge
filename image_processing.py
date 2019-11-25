@@ -7,7 +7,7 @@ def normalize(image, min_value, max_value):
   return cv2.normalize(image, normalized, min_value, max_value, cv2.NORM_MINMAX, cv2.CV_8UC1)
 
 def segment_by_threshold(image, threshold):
-  result = np.empty(image.shape)
+  result = np.zeros(image.shape)
   for row in range(image.shape[0]):
     for col in range(image.shape[1]):
       if image[row, col] >= threshold:
