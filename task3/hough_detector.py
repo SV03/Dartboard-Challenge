@@ -18,6 +18,7 @@ def gradient_direction(image):
 
 
 
+
 if __name__ == '__main__':
   image_path = sys.argv[1]
   image_name = image_path.split('/')[-1]
@@ -30,13 +31,13 @@ if __name__ == '__main__':
   
   # 2 - detections = VJ detection
   
-    for detection in detections: # 3- HT Circles
+    # for detection in detections: # 3- HT Circles
       # magnitude = 
       # direction = 
-      htc = HougTransformCirle(magnitude, direction)
+      # htc = HougTransformCirle(magnitude, direction)
       # htc.process_space()
       # circles htc.detect_circles( )
-      if (len((circles) >= 1):
+      # if (len((circles) >= 1):
         # htl = HougTransformLines()   # 4 -HT Lines
         # if (htl.number_of_lines()):
           # Confirm it is a dartboard
@@ -46,8 +47,12 @@ if __name__ == '__main__':
   # Show image with detections
   # Show Performance Report
 
+
+  
   
   resized_gray = util.image_bounds(gray, 600)
+
+  util.viola_jones_cascade(image_name,image, resized_gray) 
 
   laplacian = cv2.Laplacian(resized_gray, cv2.CV_64F, ksize=3)
   edges = util.segment_by_threshold(laplacian, threshold = 250)
@@ -58,6 +63,6 @@ if __name__ == '__main__':
   labeled_file_name = image_name.replace("dart", "out/gradient_dir")
   cv2.imwrite(labeled_file_name, gradient_direction)
 
-  # util.show_image(gradient_direction)
+  util.show_image(gradient_direction)
 
 

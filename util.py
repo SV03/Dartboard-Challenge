@@ -64,3 +64,53 @@ def image_bounds(image, pixel_value):
   resized_gray = cv2.resize(image, dim, cv2.INTER_AREA)
 
   return resized_gray
+
+def viola_jones_cascade(image_name,image,resized_gray):
+  #Multicascade  Detection
+  images_to_dartboards = load_ground_truth("../task2/dartboards.json")
+  ground_truth_dartboards = images_to_dartboards[image_name]
+  number_of_dartboards = len(ground_truth_dartboards)
+  print("Number of dartboards:", number_of_dartboards)
+  
+  vj_dartboards = cv2.CascadeClassifier('../task2/dartcascade/cascade.xml')
+  detected_dartboards = vj_dartboards.detectMultiScale(resized_gray, 1.1, 2, 0, (50, 50), (500, 500))
+  number_of_detections = len(detected_dartboards)
+  print("Number of detections:", number_of_detections)
+  
+
+  for (x1, y1, x2, y2) in ground_truth_dartboards:
+    image = cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+
+  for (x, y, w, h) in detected_dartboards:
+    image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+  threshold = 0.5
+  succeded_detections = 0
+  i = 0
+
+  for (x1, y1, x2, y2) in ground_truth_dartboards:
+    ground_truth_p1 = (x1, y1)
+    ground_truth_p2 = (x2, y2)
+    for (x, y, w, h) in detected_dartboards:
+      detected_p1 = (x, y)
+      detected_p2 = (x + w, y + h)
+      iou = intersection_over_union(ground_truth_p1, ground_truth_p2, detected_p1, detected_p2)
+      if(iou >= threshold):
+        succeded_detections += 1
+
+  print("True Positives:", succeded_detections)
+  false_positives = number_of_detections - succeded_detections
+  print("False Positives:", false_positives)
+  recall = succeded_detections / number_of_dartboards # Also called sensitivity and recall
+  print("True Positive Rate: {} / {} = ".format(succeded_detections, number_of_dartboards), recall) 
+  precision = succeded_detections / (succeded_detections + false_positives)  # Also called Positive Predictive Value (PPV)
+  print("Precision:", precision)
+  f1 = (2 * (recall * precision)) / (recall + precision)
+  print("F1:", f1)
+
+  # htc = HoughTransformCircles(mag, dir)
+  # htc.process_space()
+  # circles = htc.detect_circles()
+  
+
+
