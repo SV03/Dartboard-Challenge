@@ -25,8 +25,28 @@ if __name__ == '__main__':
   image = cv2.imread(image_path)
   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-  # rotated_gray = cv2.rotate(resized_gray, cv2.ROTATE_90_CLOCKWISE)
+  maximum_size = 500
+  # 1 resize for efficiency
+  
+  # 2 - detections = VJ detection
+  
+    for detection in detections: # 3- HT Circles
+      # magnitude = 
+      # direction = 
+      htc = HougTransformCirle(magnitude, direction)
+      # htc.process_space()
+      # circles htc.detect_circles( )
+      if (len((circles) >= 1):
+        # htl = HougTransformLines()   # 4 -HT Lines
+        # if (htl.number_of_lines()):
+          # Confirm it is a dartboard
+          # else:
+          # REJECT DETECTION
 
+  # Show image with detections
+  # Show Performance Report
+
+  
   resized_gray = util.image_bounds(gray, 600)
 
   laplacian = cv2.Laplacian(resized_gray, cv2.CV_64F, ksize=3)
