@@ -33,3 +33,9 @@ Train Classifier with `opencv_traincascade`
 ```
 
 `python subtask2.py ../input/dart1.jpg`
+
+### Task 3
+A dartboard detector was built by integrating the Viola Jones detector and detecting shapes with Hough Transforms for circles.
+
+#### Hough Transform for circles
+`> python task3/hough_transform_circles.py input/circle1.jpg`
