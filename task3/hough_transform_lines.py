@@ -11,13 +11,11 @@ class HoughTransformLines(object):
   def __init__(self, image):
     self.grad_magnitude = ip.gradient_magnitude(image)
     self.h_space = None
-    cv2.imwrite('out/edges_init.jpg', self.grad_magnitude)
+    # cv2.imwrite('out/edges_init.jpg', self.grad_magnitude)
 
-  def process(self, threshold):
+  def process_space(self, threshold):
     self.h_space = np.zeros((1800, 360))
-    # max_roe = -9999999999; min_roe = 9999999999
     roe_padding = 900
-    pixels_voting = 0
     for row in range(self.grad_magnitude.shape[0]):
       for col in range(self.grad_magnitude.shape[1]):
         if self.grad_magnitude[row, col] >= threshold:
@@ -26,7 +24,6 @@ class HoughTransformLines(object):
             theta_radians = (theta * 2 * np.pi) / 360
             roe = int(col * np.cos(theta_radians) + row * np.sin(theta_radians))
             self.h_space[roe + roe_padding, theta] += 1
-    print("pixels_voting", pixels_voting)
     self.h_space = cv2.resize(self.h_space, (360, 900))
     return self.h_space
 
@@ -53,11 +50,10 @@ if __name__ == "__main__":
   # image = ip.resize_with_aspect_ratio(image, max_side)
   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-  threshold = 150
-
+  threshold = 50
   htl = HoughTransformLines(gray)
-  h_space = htl.process(threshold=threshold)
-  lines = htl.detect_lines(minimum_votes=55)
+  h_space = htl.process_space(threshold=threshold)
+  lines = htl.detect_lines(minimum_votes=50)
   print("Detected lines:", len(lines))
   print(lines)
 

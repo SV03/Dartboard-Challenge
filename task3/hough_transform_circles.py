@@ -66,11 +66,11 @@ class HoughTransformCircles(object):
 
   def __process_gradient_magnitude(self):
     self.gradient = ip.gradient_magnitude(self.image)
-    cv2.imwrite('task3/preprocess/grad.jpg', self.gradient)
+    # cv2.imwrite('preprocess/grad.jpg', self.gradient)
 
   def __process_gradient_direction(self):
     self.direction = ip.gradient_direction(self.image)
-    cv2.imwrite('task3/preprocess/dir.jpg', self.direction)
+    # cv2.imwrite('preprocess/dir.jpg', self.direction)
 
 
 if __name__ == "__main__":
@@ -93,7 +93,7 @@ if __name__ == "__main__":
   h_space_2d = htc.squash_space(scale=1)
   print("Maximum number of votes in 2D:", np.max(h_space_2d))
 
-  cv2.imwrite(f'task3/h_space/circles_{image_name}', h_space_2d)
+  cv2.imwrite(f'h_space/circles_{image_name}', h_space_2d)
 
   circles = htc.detect_circles(minimum_votes=18)
   print("Found Circles:", len(circles))
