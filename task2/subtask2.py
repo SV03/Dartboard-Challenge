@@ -14,12 +14,10 @@ if __name__ == '__main__':
   images_to_dartboards = util.load_ground_truth("dartboards.json")
   ground_truth_dartboards = images_to_dartboards[image_name]
   number_of_dartboards = len(ground_truth_dartboards)
-  print("Number of dartboards:", number_of_dartboards)
 
-  cascade = cv2.CascadeClassifier('dartcascade/cascade.xml')
-  detected_dartboards = cascade.detectMultiScale(gray, 1.1, 2, 0, (50, 50), (500, 500))
+  cascade_file = 'dartcascade/cascade.xml'
+  detected_dartboards = util.viola_jones_detection(cascade_file, gray)
   number_of_detections = len(detected_dartboards)
-  print("Number of detections:", number_of_detections)
 
   for (x1, y1, x2, y2) in ground_truth_dartboards:
     image = cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
@@ -27,30 +25,10 @@ if __name__ == '__main__':
   for (x, y, w, h) in detected_dartboards:
     image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-  threshold = 0.5
-  succeded_detections = 0
+  iou_threshold = 0.5
+  util.print_report(ground_truth_dartboards, detected_dartboards, iou_threshold)
 
-  for (x1, y1, x2, y2) in ground_truth_dartboards:
-    ground_truth_p1 = (x1, y1)
-    ground_truth_p2 = (x2, y2)
-    for (x, y, w, h) in detected_dartboards:
-      detected_p1 = (x, y)
-      detected_p2 = (x + w, y + h)
-      iou = util.intersection_over_union(ground_truth_p1, ground_truth_p2, detected_p1, detected_p2)
-      if(iou >= threshold):
-        succeded_detections += 1
-
-  print("True Positives:", succeded_detections)
-  false_positives = number_of_detections - succeded_detections
-  print("False Positives:", false_positives)
-  recall = succeded_detections / number_of_dartboards # Also called sensitivity and recall
-  print("True Positive Rate: {} / {} = ".format(succeded_detections, number_of_dartboards), recall) 
-  precision = succeded_detections / (succeded_detections + false_positives)  # Also called Positive Predictive Value (PPV)
-  print("Precision:", precision)
-  f1 = (2 * (recall * precision)) / (recall + precision)
-  print("F1:", f1)
-
-  # labeled_file_name = image_name.replace("dart", "out/labeled_dart")
-  # cv2.imwrite(labeled_file_name, image)
+  labeled_file_name = image_name.replace("dart", "out/labeled_dart")
+  cv2.imwrite(labeled_file_name, image)
 
   util.show_image(image)
