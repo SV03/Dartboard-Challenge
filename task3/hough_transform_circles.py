@@ -42,6 +42,7 @@ class HoughTransformCircles(object):
             x0 = col + a
             if (self.__inside_image_scope(y = y0, x = x0)):
               self.h_space[y0][x0][r_index] += 1
+    # print("Maximum number of votes:", np.max(self.h_space))
     return self.h_space
   
   def squash_space(self, scale):
@@ -65,33 +66,37 @@ class HoughTransformCircles(object):
 
   def __process_gradient_magnitude(self):
     self.gradient = ip.gradient_magnitude(self.image)
-  # cv2.imwrite(f'preprocess/grad_{image_name}', self.gradient)
+    cv2.imwrite('task3/preprocess/grad.jpg', self.gradient)
 
   def __process_gradient_direction(self):
     self.direction = ip.gradient_direction(self.image)
-  # cv2.imwrite(f'preprocess/dir_{image_name}', self.direction)
+    cv2.imwrite('task3/preprocess/dir.jpg', self.direction)
 
 
 if __name__ == "__main__":
+  print("Main: Hough Transform Circles!")
   image_path = sys.argv[1]
   image_name = image_path.split('/')[-1]
   print(f"Opening {image_name}")
 
   image = cv2.imread(image_path)
   
-  max_side = 150
-  image = ip.resize_with_aspect_ratio(image, max_side)
+  # max_side = 150
+  # image = ip.resize_with_aspect_ratio(image, max_side)
   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-  threshold = 80
-  min_radius = 30
+  threshold = 50
+  min_radius = 20
   max_radius = 100
   htc = HoughTransformCircles(gray, min_radius=min_radius, max_radius=max_radius)
   h_space = htc.process_space(threshold=threshold)
   h_space_2d = htc.squash_space(scale=1)
-  # cv2.imwrite(f'h_space/circles_{image_name}', h_space_2d)
+  print("Maximum number of votes in 2D:", np.max(h_space_2d))
 
-  circles = htc.detect_circles(minimum_votes=20)
+  cv2.imwrite(f'task3/h_space/circles_{image_name}', h_space_2d)
+
+  circles = htc.detect_circles(minimum_votes=18)
+  print("Found Circles:", len(circles))
   for row, col, radius in circles:
     p0 = (col - radius, row - radius)
     p1 = (col + radius, row + radius)

@@ -29,7 +29,6 @@ if __name__ == '__main__':
 
   threshold = 0.5
   succeded_detections = 0
-  i = 0
 
   for (x1, y1, x2, y2) in ground_truth_dartboards:
     ground_truth_p1 = (x1, y1)
