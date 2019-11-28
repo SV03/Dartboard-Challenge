@@ -69,4 +69,4 @@ def load_ground_truth(ground_truth_file):
 
 def viola_jones_detection(cascade_file, gray_image):
   cascade_classifier = cv2.CascadeClassifier(cascade_file)
-  return cascade_classifier.detectMultiScale(gray_image, 1.3, 2, 0, (50, 50), (500, 500))
+  return cascade_classifier.detectMultiScale(gray_image, 1.1, 1, 0, (50, 50), (500, 500))
