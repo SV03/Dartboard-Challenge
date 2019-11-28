@@ -16,7 +16,7 @@ class HoughTransformLines(object):
   def process(self, threshold):
     self.h_space = np.zeros((1800, 360))
     # max_roe = -9999999999; min_roe = 9999999999
-    roe_padding = 800
+    roe_padding = 900
     pixels_voting = 0
     for row in range(self.grad_magnitude.shape[0]):
       for col in range(self.grad_magnitude.shape[1]):
@@ -25,15 +25,22 @@ class HoughTransformLines(object):
           for theta in range(360):
             theta_radians = (theta * 2 * np.pi) / 360
             roe = int(col * np.cos(theta_radians) + row * np.sin(theta_radians))
-            # if roe > max_roe: max_roe = roe
-            # if roe < min_roe: min_roe = roe
             self.h_space[roe + roe_padding, theta] += 1
     print("pixels_voting", pixels_voting)
-    # print("max_roe", max_roe); print("min_roe", min_roe)
-    # h_space = h_space * 3 # Make curves brighter
-    # h_space = ip.normalize(h_space, 0, 255)
-    self.h_space = cv2.resize(self.h_space, (550, 650), cv2.CV_8UC1)
+    self.h_space = cv2.resize(self.h_space, (360, 900))
     return self.h_space
+
+  def detect_lines(self, minimum_votes):
+    detections = []; lines = []
+    for roe in range(self.h_space.shape[0]):
+      for theta in range(self.h_space.shape[1]):
+        if (self.h_space[roe, theta] >= minimum_votes):
+          detections.append((roe, theta))
+    # print("Numb of detections:", len(detections))
+    for roe, theta in detections:
+      if all( abs(theta - c_theta) > 15 for c_roe, c_theta in lines):
+        lines.append((roe, theta))
+    return lines
 
 if __name__ == "__main__":
   print("Main: Hough Transform Lines!")
@@ -50,6 +57,9 @@ if __name__ == "__main__":
 
   htl = HoughTransformLines(gray)
   h_space = htl.process(threshold=threshold)
+  lines = htl.detect_lines(minimum_votes=55)
+  print("Detected lines:", len(lines))
+  print(lines)
 
   cv2.imwrite(f'h_space/lines_{image_name}', h_space)
   # util.show_image(h_space)
