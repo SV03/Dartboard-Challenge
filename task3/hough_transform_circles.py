@@ -74,7 +74,7 @@ class HoughTransformCircles(object):
 
 
 if __name__ == "__main__":
-  print("Main: Hough Transform Circles!")
+  print("Main: Hough Transform Circles")
   image_path = sys.argv[1]
   image_name = image_path.split('/')[-1]
   print(f"Opening {image_name}")
