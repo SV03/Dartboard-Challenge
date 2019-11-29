@@ -65,7 +65,8 @@ class HoughTransformCircles(object):
     return y >= 0 and x >= 0 and y < self.height and x < self.width
 
   def __process_gradient_magnitude(self):
-    self.gradient = ip.gradient_magnitude(self.image)
+    self.gradient = cv2.equalizeHist(ip.gradient_magnitude(self.image))
+    # self.gradient = cv2.Canny(self.image, 100, 200)
     # cv2.imwrite('preprocess/grad.jpg', self.gradient)
 
   def __process_gradient_direction(self):
