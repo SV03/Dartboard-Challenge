@@ -19,7 +19,6 @@ class HoughTransformLines(object):
     for row in range(self.grad_magnitude.shape[0]):
       for col in range(self.grad_magnitude.shape[1]):
         if self.grad_magnitude[row, col] >= threshold:
-          pixels_voting += 1
           for theta in range(360):
             theta_radians = (theta * 2 * np.pi) / 360
             roe = int(col * np.cos(theta_radians) + row * np.sin(theta_radians))

@@ -35,15 +35,15 @@ if __name__ == '__main__':
 
   threshold = 50
   confirmed_detections = []
+  # detection_index = 0
   for x, y, width, height in vj_detections:
-    detection_index = 0
     detection_region = gray[y : y+height, x : x+width]
-    # detection_index += 1
     # cv2.imwrite(f'preprocess/detected_region_{detection_index}.jpg', detection_region)
+    # detection_index += 1
 
-    circle_detector = HoughTransformCircles(detection_region)
+    circle_detector = HoughTransformCircles(detection_region, min_radius=20, max_radius=100)
     circle_detector.process_space(threshold=threshold)
-    circles = circle_detector.detect_circles(minimum_votes=15)
+    circles = circle_detector.detect_circles(minimum_votes=13)
     num_of_circles = len(circles)
     print("Detected Circles", num_of_circles)
     
@@ -62,6 +62,6 @@ if __name__ == '__main__':
     image = cv2.rectangle(image, (x, y), (x + width, y + height), (0, 255, 0), 2)
 
   util.print_report(ground_truth_dartboards, confirmed_detections)
-  
+
   cv2.imwrite(f'out/labeled_{image_name}', image)
   util.show_image(image)
