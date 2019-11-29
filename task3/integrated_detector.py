@@ -38,12 +38,15 @@ if __name__ == '__main__':
   # detection_index = 0
   for x, y, width, height in vj_detections:
     detection_region = gray[y : y+height, x : x+width]
+    detection_region = ip.resize_with_aspect_ratio(detection_region, max_side=150)
+    
     # cv2.imwrite(f'preprocess/detected_region_{detection_index}.jpg', detection_region)
+    # print("--> Detection: ", detection_index)
     # detection_index += 1
 
-    circle_detector = HoughTransformCircles(detection_region, min_radius=20, max_radius=100)
+    circle_detector = HoughTransformCircles(detection_region, min_radius=25, max_radius=100)
     circle_detector.process_space(threshold=threshold)
-    circles = circle_detector.detect_circles(minimum_votes=13)
+    circles = circle_detector.detect_circles(minimum_votes=14)
     num_of_circles = len(circles)
     print("Detected Circles", num_of_circles)
     
@@ -55,7 +58,7 @@ if __name__ == '__main__':
       lines = line_detector.detect_lines(minimum_votes=50)
       num_of_lines = len(lines)
       print("Detected Lines", num_of_lines)
-      if ((num_of_lines >= 19 and num_of_lines <= 20) or (num_of_circles == 1 and num_of_lines >= 14)):
+      if ((num_of_lines >= 18 and num_of_lines <= 20) or (num_of_circles == 1 and num_of_lines >= 13)):
         confirmed_detections.append((x, y, width, height))
 
   for x, y, width, height in confirmed_detections:
