@@ -105,7 +105,7 @@ if __name__ == "__main__":
     min_radius=min_radius,
     max_radius=max_radius,
     image_name=image_name,
-    edge_detection_strategy="CANNY"
+    edge_detection_strategy="GRAD"
   )
   threshold = 50
   h_space = htc.process_space(threshold=threshold)
