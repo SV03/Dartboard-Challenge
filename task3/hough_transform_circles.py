@@ -3,13 +3,14 @@ import numpy as np
 import sys
 import os
 import math
+from random import randint
 PARENT_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(PARENT_PATH); 
 import util
 import image_processing as ip
 
 class HoughTransformCircles(object):
-  def __init__(self, image, min_radius=30, max_radius=100):
+  def __init__(self, image, min_radius=30, max_radius=100, image_name=None):
     self.image = image
     self.height = image.shape[0]
     self.width = image.shape[1]
@@ -18,6 +19,7 @@ class HoughTransformCircles(object):
     self.gradient = None
     self.direction = None
     self.h_space = None
+    self.image_name = image_name or str(randint(16, 100)) + ".jpg"
 
   def process_space(self, threshold):
     self.__process_gradient_magnitude()
@@ -42,11 +44,14 @@ class HoughTransformCircles(object):
             x0 = col + a
             if (self.__inside_image_scope(y = y0, x = x0)):
               self.h_space[y0][x0][r_index] += 1
-    # print("Maximum number of votes:", np.max(self.h_space))
+    print("Maximum number of votes:", np.max(self.h_space))
     return self.h_space
   
   def squash_space(self, scale):
-    return np.sum(self.h_space, axis=2) * scale
+    h_space_2d = np.sum(self.h_space, axis=2) * scale
+    print("Maximum number of votes in 2D:", np.max(h_space_2d))
+    cv2.imwrite(f'h_space/circles_{self.image_name}', h_space_2d)
+    return h_space_2d
 
   def detect_circles(self, minimum_votes=20):
     detections = []; circles = []
@@ -65,13 +70,14 @@ class HoughTransformCircles(object):
     return y >= 0 and x >= 0 and y < self.height and x < self.width
 
   def __process_gradient_magnitude(self):
-    self.gradient = cv2.equalizeHist(ip.gradient_magnitude(self.image))
+    # self.gradient = cv2.equalizeHist(ip.gradient_magnitude(self.image))
+    self.gradient = ip.gradient_magnitude(self.image)
     # self.gradient = cv2.Canny(self.image, 100, 200)
-    cv2.imwrite('out/grad{}.jpg'.format(np.random.rand()), self.gradient)
+    # cv2.imwrite('out/grad{}.jpg'.format(np.random.rand()), self.gradient)
 
   def __process_gradient_direction(self):
     self.direction = ip.gradient_direction(self.image)
-    cv2.imwrite('out/dir{}.jpg'.format(np.random.rand()), self.direction)
+    # cv2.imwrite('out/dir{}.jpg'.format(np.random.rand()), self.direction)
 
 
 if __name__ == "__main__":
@@ -86,17 +92,19 @@ if __name__ == "__main__":
   # image = ip.resize_with_aspect_ratio(image, max_side)
   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-  threshold = 50
   min_radius = 20
   max_radius = 100
-  htc = HoughTransformCircles(gray, min_radius=min_radius, max_radius=max_radius)
+  htc = HoughTransformCircles(
+    image=gray,
+    min_radius=min_radius,
+    max_radius=max_radius,
+    image_name=image_name,
+  )
+  threshold = 50
   h_space = htc.process_space(threshold=threshold)
   h_space_2d = htc.squash_space(scale=1)
-  print("Maximum number of votes in 2D:", np.max(h_space_2d))
 
-  cv2.imwrite(f'h_space/circles_{image_name}', h_space_2d)
-
-  circles = htc.detect_circles(minimum_votes=18)
+  circles = htc.detect_circles(minimum_votes=14)
   print("Found Circles:", len(circles))
   for row, col, radius in circles:
     p0 = (col - radius, row - radius)
