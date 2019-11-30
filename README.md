@@ -6,7 +6,12 @@ Some instructions
 
 ### Task 2 
 
-For the multiscale we used 1.1 scale_image and 2 min_neighbours. 
+For the multiscale we used 1.1 scale_image and 2 min_neighbours.
+
+```
+cd task2
+python subtask2.py ../input/dart0.jpg
+```
 
 #### Train Cascade Classifier
 Generate positive dataset with `opencv_createsamples`

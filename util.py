@@ -43,6 +43,7 @@ def print_report(ground_truth, detections, iou_threshold=0.5):
   false_positives = number_of_detections - succeded_detections
   print("False Positives:", false_positives)
   tpr = succeded_detections / number_of_grounds_truths # Also called sensitivity and recall
+  if tpr > 1: tpr = 1.0 # Avoid having a TPR greater than 1 when detections overlap
   print("True Positive Rate:", tpr)
   
   try:
