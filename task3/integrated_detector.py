@@ -34,17 +34,33 @@ if __name__ == '__main__':
     image = cv2.rectangle(image, (x, y), (x + width, y + height), (255, 0, 0), 2)
 
   threshold = 50
+  magnitude = ip.extract_edges(gray, "GRAD")
+  thresholded_magnitude = ip.segment_by_threshold(magnitude, threshold=threshold)
+  cv2.imwrite(f"out/thresh_edges_{image_name}", thresholded_magnitude)
+
+  # magnitude = ip.extract_edges(gray, "CGRAD")
+  # enhanced_thresholded_magnitude = ip.segment_by_threshold(enhanced_magnitude, threshold=threshold)
+  # cv2.imwrite(f"out/enhanced_thresholded_magnitude_{image_name}", enhanced_thresholded_magnitude)
+
   confirmed_detections = []
-  # detection_index = 0
+  detection_index = 0
+
   for x, y, width, height in vj_detections:
+    print("--- Analizing VJ detection:", detection_index)
+
     detection_region = gray[y : y+height, x : x+width]
     detection_region = ip.resize_with_aspect_ratio(detection_region, max_side=150)
     
     # cv2.imwrite(f'preprocess/detected_region_{detection_index}.jpg', detection_region)
     # print("--> Detection: ", detection_index)
-    # detection_index += 1
 
-    circle_detector = HoughTransformCircles(detection_region, min_radius=25, max_radius=100)
+    circle_detector = HoughTransformCircles(
+      detection_region,
+      min_radius=25,
+      max_radius=100,
+      image_name=image_name,
+      edge_detection_strategy="GRAD",
+    )
     circle_detector.process_space(threshold=threshold)
     circles = circle_detector.detect_circles(minimum_votes=14)
     num_of_circles = len(circles)
@@ -60,6 +76,8 @@ if __name__ == '__main__':
       print("Detected Lines", num_of_lines)
       if ((num_of_lines >= 18 and num_of_lines <= 20) or (num_of_circles == 1 and num_of_lines >= 13)):
         confirmed_detections.append((x, y, width, height))
+
+    detection_index += 1
 
   for x, y, width, height in confirmed_detections:
     image = cv2.rectangle(image, (x, y), (x + width, y + height), (0, 255, 0), 2)

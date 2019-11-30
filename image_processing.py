@@ -49,3 +49,13 @@ def gradient_magnitude(image):
     for col in range(image.shape[1]):
       magnitude[row, col] = math.sqrt(gradient_y[row, col]**2 + gradient_x[row, col]**2)
   return normalize(magnitude, 0, 255)
+
+def extract_edges(image, strategy="GRAD"):
+  if (strategy == "GRAD"):
+    edges = gradient_magnitude(image)
+  elif (strategy == "CGRAD"):
+    edges = cv2.equalizeHist(gradient_magnitude(image))
+  elif (strategy == "CANNY"):
+    edges = cv2.Canny(image, 100, 200)
+  else: print("NO EDGE DETECTION STRATEGY")
+  return edges

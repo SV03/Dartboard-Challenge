@@ -58,7 +58,7 @@ class HoughTransformCircles(object):
   def squash_space(self, scale):
     h_space_2d = np.sum(self.h_space, axis=2) * scale
     print("HTC: Maximum number of votes in 2D:", np.max(h_space_2d))
-    cv2.imwrite(f'h_space/circles_{self.image_name}', h_space_2d)
+    # cv2.imwrite(f'h_space/circles_{self.image_name}', h_space_2d)
     return h_space_2d
 
   def detect_circles(self, minimum_votes=20):
@@ -78,16 +78,8 @@ class HoughTransformCircles(object):
     return y >= 0 and x >= 0 and y < self.height and x < self.width
 
   def __process_gradient_magnitude(self):
-    strategy = self.edge_detection_strategy
-    if (strategy == "GRAD"):
-      edges = ip.gradient_magnitude(self.image)
-    elif (strategy == "CGRAD"):
-      edges = cv2.equalizeHist(ip.gradient_magnitude(self.image))
-    elif (strategy == "CANNY"):
-      edges = cv2.Canny(self.image, 100, 200)
-    else: print("NO EDGE DETECTION STRATEGY")
-    self.edges = edges
-    cv2.imwrite(f'out/edges_{self.image_name}', self.edges)
+    self.edges = ip.extract_edges(self.image, self.edge_detection_strategy)
+    # cv2.imwrite(f'out/edges_{self.image_name}', self.edges)
 
   def __process_gradient_direction(self):
     self.direction = ip.gradient_direction(self.image)
