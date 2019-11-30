@@ -10,16 +10,24 @@ import util
 import image_processing as ip
 
 class HoughTransformCircles(object):
-  def __init__(self, image, min_radius=30, max_radius=100, image_name=None):
+  def __init__(
+    self,
+    image,
+    min_radius=30,
+    max_radius=100,
+    image_name=None,
+    edge_detection_strategy="GRAD",
+  ):
     self.image = image
     self.height = image.shape[0]
     self.width = image.shape[1]
     self.min_radius = min_radius
     self.max_radius = max_radius
-    self.gradient = None
+    self.edges = None
     self.direction = None
     self.h_space = None
     self.image_name = image_name or str(randint(16, 100)) + ".jpg"
+    self.edge_detection_strategy = edge_detection_strategy
 
   def process_space(self, threshold):
     self.__process_gradient_magnitude()
@@ -28,7 +36,7 @@ class HoughTransformCircles(object):
     self.h_space = np.zeros([self.height, self.width, possible_radious])
     for row in range(self.height):
       for col in range(self.width):
-        if self.gradient[row][col] > threshold:
+        if self.edges[row][col] > threshold:
           for r_index in range(possible_radious):
             radius = int(self.min_radius + r_index)
             direction_in_radians = (self.direction[row][col] * 2 * np.pi) / 255
@@ -44,12 +52,12 @@ class HoughTransformCircles(object):
             x0 = col + a
             if (self.__inside_image_scope(y = y0, x = x0)):
               self.h_space[y0][x0][r_index] += 1
-    print("Maximum number of votes:", np.max(self.h_space))
+    print("HTC: Maximum number of votes:", np.max(self.h_space))
     return self.h_space
   
   def squash_space(self, scale):
     h_space_2d = np.sum(self.h_space, axis=2) * scale
-    print("Maximum number of votes in 2D:", np.max(h_space_2d))
+    print("HTC: Maximum number of votes in 2D:", np.max(h_space_2d))
     cv2.imwrite(f'h_space/circles_{self.image_name}', h_space_2d)
     return h_space_2d
 
@@ -70,10 +78,16 @@ class HoughTransformCircles(object):
     return y >= 0 and x >= 0 and y < self.height and x < self.width
 
   def __process_gradient_magnitude(self):
-    # self.gradient = cv2.equalizeHist(ip.gradient_magnitude(self.image))
-    self.gradient = ip.gradient_magnitude(self.image)
-    # self.gradient = cv2.Canny(self.image, 100, 200)
-    # cv2.imwrite('out/grad{}.jpg'.format(np.random.rand()), self.gradient)
+    strategy = self.edge_detection_strategy
+    if (strategy == "GRAD"):
+      edges = ip.gradient_magnitude(self.image)
+    elif (strategy == "CGRAD"):
+      edges = cv2.equalizeHist(ip.gradient_magnitude(self.image))
+    elif (strategy == "CANNY"):
+      edges = cv2.Canny(self.image, 100, 200)
+    else: print("NO EDGE DETECTION STRATEGY")
+    self.edges = edges
+    cv2.imwrite(f'out/edges_{self.image_name}', self.edges)
 
   def __process_gradient_direction(self):
     self.direction = ip.gradient_direction(self.image)
@@ -99,6 +113,7 @@ if __name__ == "__main__":
     min_radius=min_radius,
     max_radius=max_radius,
     image_name=image_name,
+    edge_detection_strategy="CANNY"
   )
   threshold = 50
   h_space = htc.process_space(threshold=threshold)
