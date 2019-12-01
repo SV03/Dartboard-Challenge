@@ -73,8 +73,7 @@ if __name__ == "__main__":
         x2 = int(x1 + (template_width * ratio))
         y2 = int(y1 + (template_height * ratio))
         detection_boxes.append((x1, y1, x2, y2))
-        cv2.rectangle(image, (x1, y1), (x2, y2), (255, 0, 0), 1)
-        # cv2.imwrite(f"preprocess/resized_{scale}_{image_name}", resized)
+        # cv2.rectangle(image, (x1, y1), (x2, y2), (255, 0, 0), 1)
 
   print("--> Matches Found:", len(detection_boxes))
 
