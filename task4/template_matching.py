@@ -16,11 +16,6 @@ def read_templates(names_list):
     templates.append(cv2.imread(template_name, 0))
   return templates
 
-def match_template(image, template, method=cv2.TM_CCORR):
-  result_image = cv2.matchTemplate(edged, template, method)
-  (_, max_val, _, max_loc) = cv2.minMaxLoc(result_image)
-  return (max_val, max_loc)
-
 if __name__ == "__main__":
   print("Main: Full detector")
   image_path = sys.argv[1]
@@ -69,22 +64,17 @@ if __name__ == "__main__":
       if resized.shape[0] < template_height or resized.shape[1] < template_width: 
         break
 
-      # max_val, max_loc = match_template(edged, template, method=cv2.TM_CCORR_NORMED)
       result = cv2.matchTemplate(edged, template, cv2.TM_CCORR_NORMED)
-      threshold = 0.4661
+      threshold = 0.466
       loc = np.where( result >= threshold)
       for pt in zip(*loc[::-1]):
-        # TODO: we need to store the max value
-        x1, y1 = pt
-        # cv2.imwrite(f"preprocess/resized_{scale}_{image_name}", resized)
-        # print("Scale ", scale)
-        x1 = int(x1 * ratio)
-        y1 = int(y1 * ratio)
+        x1 = int(pt[0] * ratio)
+        y1 = int(pt[1] * ratio)
         x2 = int(x1 + (template_width * ratio))
         y2 = int(y1 + (template_height * ratio))
         detection_boxes.append((x1, y1, x2, y2))
-        cv2.rectangle(image, (x1, y1), (x2, y2), (255, 0, 0), 2)
-        # print("New max:", max_val, (x1, y1), (x2, y2))
+        cv2.rectangle(image, (x1, y1), (x2, y2), (255, 0, 0), 1)
+        # cv2.imwrite(f"preprocess/resized_{scale}_{image_name}", resized)
 
   print("--> Matches Found:", len(detection_boxes))
 
@@ -99,5 +89,5 @@ if __name__ == "__main__":
 
   util.print_report(ground_truth_dartboards, detections)
 
-  # cv2.imwrite(f'out/labeled_{image_name}', image)
+  cv2.imwrite(f'out/labeled_{image_name}', image)
   util.show_image(image)
