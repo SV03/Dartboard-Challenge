@@ -41,28 +41,28 @@ if __name__ == "__main__":
   number_of_dartboards = len(ground_truth_dartboards)
 
   template_names = [
-    "templates/dart_circle.jpg",
+    "templates/dart_circle0.jpg",
+    "templates/dart_circle1.jpg",
+    "templates/dart_circle2.jpg",
     # "templates/dart_ellipsis0.jpg",
-    # "templates/dart_ellipsis1.jpg",
+    "templates/dart_ellipsis1.jpg",
     # "templates/dart_ellipsis2.jpg",
     # "templates/dart_ellipsis3.jpg", 
   ]
   templates = read_templates(template_names)
 
-  max_found = None
   detection_boxes = []
-  points_nms = []
   lowest_scale = 0.2
   highest_scale = 1.0
   number_of_resizes = int((highest_scale - lowest_scale) * 50)
   print("Number of resizes", number_of_resizes)
+
   for scale in np.linspace(lowest_scale, highest_scale, number_of_resizes)[::-1]:
     resized = imutils.resize(gray, width = int(gray.shape[1] * scale))
-    # resized = ip.resize_with_aspect_ratio(gray, max_side=int(gray.shape[1] * scale))
 
     ratio = gray.shape[1] / float(resized.shape[1]) 
 
-    edged  = cv2.Canny(resized, 50, 200)
+    edged  = cv2.Canny(resized, 100, 200)
     for template in templates:
       template_height, template_width = template.shape
       # if the resized image is smaller than the template, then break from the loop
@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
       # max_val, max_loc = match_template(edged, template, method=cv2.TM_CCORR_NORMED)
       result = cv2.matchTemplate(edged, template, cv2.TM_CCORR_NORMED)
-      threshold = 0.458
+      threshold = 0.4661
       loc = np.where( result >= threshold)
       for pt in zip(*loc[::-1]):
         # TODO: we need to store the max value
