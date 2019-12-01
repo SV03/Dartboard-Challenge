@@ -70,7 +70,7 @@ class HoughTransformCircles(object):
             radius = r_index + self.min_radius
             detections.append((row, col, radius))
     for row, col, radius in detections:
-      if all( abs(radius - c_rad) > 12 for c_row, c_col, c_rad in circles):
+      if all( (abs(radius - c_rad) > 12 or abs(row - c_row) > 25 or abs(col - c_col) > 25) for c_row, c_col, c_rad in circles):
         circles.append((row, col, radius))
     return circles
 
@@ -83,7 +83,7 @@ class HoughTransformCircles(object):
 
   def __process_gradient_direction(self):
     self.direction = ip.gradient_direction(self.image)
-    # cv2.imwrite('out/dir{}.jpg'.format(np.random.rand()), self.direction)
+    # cv2.imwrite(f'out/dir_{self.image_name}', self.direction)
 
 
 if __name__ == "__main__":
