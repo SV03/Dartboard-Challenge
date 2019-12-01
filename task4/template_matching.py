@@ -8,6 +8,7 @@ sys.path.append(PARENT_PATH);
 import util
 import image_processing as ip
 import imutils
+import non_maximum_suppression as nms
 
 def read_templates(names_list):
   templates = []
@@ -30,7 +31,7 @@ gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 template_names = [
   "templates/dart_circle.jpg",
-  "templates/dart_ellipsis0.jpg",
+  # "templates/dart_ellipsis0.jpg",
   # "templates/dart_ellipsis1.jpg",
   # "templates/dart_ellipsis2.jpg",
   # "templates/dart_ellipsis3.jpg", 
@@ -39,7 +40,7 @@ templates = read_templates(template_names)
 
 max_found = None
 maximum_matches = []
-
+points_nms = []
 lowest_scale = 0.2
 highest_scale = 1.0
 number_of_resizes = 40
@@ -68,12 +69,19 @@ for scale in np.linspace(lowest_scale, highest_scale, number_of_resizes)[::-1]:
       endX = int((max_loc[0] + template_width) * ratio)
       endY = int((max_loc[1] + template_height) * ratio)
       maximum_matches.append((max_val, (startX, startY), (endX, endY)))
+      points_nms.append((startX, startY, endX, endY))
       print("New max:", max_val, (startX, startY), (endX, endY))
 
+
+boxes = nms.non_max_suppression_fast(np.array(points_nms), 0.6)
+print(boxes)
 print("Matches Found:", len(maximum_matches))
 
 for max_val, top_left, bottom_right in maximum_matches:
-  cv2.rectangle(image, top_left, bottom_right, (255, 0, 0), 2)
+  cv2.rectangle(image, top_left, bottom_right, (255, 0, 0), 3)
+
+for x1, y1, x2, y2 in boxes:
+  cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
 # for top_left, bottom_right in detections:
 #   cv2.rectangle(image, top_left, bottom_right, (0, 255, 0), 2)
