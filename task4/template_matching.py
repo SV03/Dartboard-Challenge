@@ -19,13 +19,13 @@ gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 # Read the template 
 template = cv2.imread('../input/dart16.jpg', 0)
 template = cv2.resize(template, (60, 50))
-# Store width and height of template in w and h 
-w, h = template.shape[::-1]
-print(w, h)
-print(template.shape)
+template_height, template_width = template.shape
+
 found = None
-  
-for scale in np.linspace(0.2, 1.0, 40)[::-1]: 
+detections = []
+
+for scale in np.linspace(0.2, 1.0, 40)[::-1]:
+  print(scale)
   
   # resize the image according to the scale, and keep track  
   # of the ratio of the resizing 
@@ -43,21 +43,26 @@ for scale in np.linspace(0.2, 1.0, 40)[::-1]:
   edged  = cv2.Canny(resized, 50, 200) 
   result = cv2.matchTemplate(edged, template,cv2.TM_CCORR) 
   (_, maxVal, _, maxLoc) = cv2.minMaxLoc(result) 
-  print("Result",( maxVal, maxLoc))
+  # print("Result",( maxVal, maxLoc))
   # if we have found a new maximum correlation value, then update
   # the found variable 
   if found is None or maxVal > found[0]: 
-    if resized.shape[0] < h or resized.shape[1] < w: 
+    if resized.shape[0] < template_height or resized.shape[1] < template_width: 
       break
     found = (maxVal, maxLoc, ratio)
   
 # unpack the found varaible and compute the (x, y) coordinates 
 # of the bounding box based on the resized ratio 
-    (_, maxLoc, ratio) = found 
-    (startX, startY) = (int(maxLoc[0] * ratio), int(maxLoc[1] * ratio)) 
-    (endX, endY) = (int((maxLoc[0] + w) * ratio), int((maxLoc[1] + h) * ratio)) 
+    # (_, maxLoc, ratio) = found 
+    startX = int(maxLoc[0] * ratio)
+    startY = int(maxLoc[1] * ratio)
+    endX = int((maxLoc[0] + template_width) * ratio)
+    endY = int((maxLoc[1] + template_height) * ratio)
+    detections.append(((startX, startY), (endX, endY)))
 
 # draw a bounding box around the detected result and display the image 
-    cv2.rectangle(image, (startX, startY), (endX, endY), (0, 255, 0), 2) 
+
+for top_left, bottom_right in detections:
+    cv2.rectangle(image, top_left, bottom_right, (0, 255, 0), 2) 
 
 util.show_image(image)
