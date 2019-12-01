@@ -2,7 +2,11 @@
 
 ### Task 1
 
-Some instructions
+```
+cd task1
+python subtask1.py ../input/dart4.jpg
+```
+Only the following images can be analyzed: `dart4.jpg`, `dart5.jpg`, `dart13.jpg`, `dart14.jpg`,`dart 15.jpg`.
 
 ### Task 2 
 

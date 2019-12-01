@@ -2,7 +2,8 @@ import cv2
 import sys
 import os
 PARENT_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(PARENT_PATH); import util
+sys.path.append(PARENT_PATH);
+import util
 
 if __name__ == '__main__':
   image_path = sys.argv[1]
@@ -31,31 +32,9 @@ if __name__ == '__main__':
   for (x, y, w, h) in detected_faces:
     image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-  threshold = 0.5
-  succeded_detections = 0
-  i = 0
+  iou_threshold = 0.5
 
-  for face_coordinate in ground_truth_faces:
-    ground_truth_p1 = (face_coordinate[0], face_coordinate[1])
-    ground_truth_p2 = (face_coordinate[2], face_coordinate[3])
-    # print("Ground truth", ground_truth_p1, ground_truth_p2)
-    for (x, y, w, h) in detected_faces:
-      detected_p1 = (x, y)
-      detected_p2 = (x + w, y + h)
-      iou = util.intersection_over_union(ground_truth_p1, ground_truth_p2, detected_p1, detected_p2)
-      # print(detected_p1, detected_p2, iou)
-      if(iou >= threshold):
-        succeded_detections += 1
-
-  print("True Positives:", succeded_detections)
-  false_positives = number_of_detections - succeded_detections
-  print("False Positives:", false_positives)
-  recall = succeded_detections / number_of_faces # Also called sensitivity and recall
-  print("True Positive Rate: {} / {} = ".format(succeded_detections, number_of_faces), recall) 
-  precision = succeded_detections / (succeded_detections + false_positives)  # Also called Positive Predictive Value (PPV)
-  print("Precision:", precision)
-  f1 = (2 * (recall * precision)) / (recall + precision)
-  print("F1:", f1)
+  util.print_report(ground_truth_faces, detected_faces, iou_threshold)
 
   # labeled_file_name = image_name.replace("dart", "out/labeled")
   # cv2.imwrite(labeled_file_name, image)
