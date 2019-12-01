@@ -32,7 +32,6 @@ if __name__ == "__main__":
   images_to_dartboards = util.load_ground_truth("../task2/dartboards.json")
   ground_truth_dartboards = images_to_dartboards[image_name]
   number_of_dartboards = len(ground_truth_dartboards)
-  print("Number of dartboards:", number_of_dartboards)
 
   for x1, y1, x2, y2 in ground_truth_dartboards:
     image = cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
@@ -40,7 +39,6 @@ if __name__ == "__main__":
   images_to_dartboards = util.load_ground_truth("../task2/dartboards.json")
   ground_truth_dartboards = images_to_dartboards[image_name]
   number_of_dartboards = len(ground_truth_dartboards)
-  print("Number of dartboards:", number_of_dartboards)
 
   template_names = [
     "templates/dart_circle.jpg",
@@ -54,9 +52,10 @@ if __name__ == "__main__":
   max_found = None
   detection_boxes = []
   points_nms = []
-  lowest_scale = 0.1
+  lowest_scale = 0.2
   highest_scale = 1.0
-  number_of_resizes = 100
+  number_of_resizes = int((highest_scale - lowest_scale) * 50)
+  print("Number of resizes", number_of_resizes)
   for scale in np.linspace(lowest_scale, highest_scale, number_of_resizes)[::-1]:
     resized = imutils.resize(gray, width = int(gray.shape[1] * scale))
     # resized = ip.resize_with_aspect_ratio(gray, max_side=int(gray.shape[1] * scale))
@@ -72,7 +71,7 @@ if __name__ == "__main__":
 
       # max_val, max_loc = match_template(edged, template, method=cv2.TM_CCORR_NORMED)
       result = cv2.matchTemplate(edged, template, cv2.TM_CCORR_NORMED)
-      threshold = 0.46
+      threshold = 0.458
       loc = np.where( result >= threshold)
       for pt in zip(*loc[::-1]):
         # TODO: we need to store the max value
@@ -87,11 +86,11 @@ if __name__ == "__main__":
         cv2.rectangle(image, (x1, y1), (x2, y2), (255, 0, 0), 2)
         # print("New max:", max_val, (x1, y1), (x2, y2))
 
-  print("Matches Found:", len(detection_boxes))
+  print("--> Matches Found:", len(detection_boxes))
 
   detection_boxes = np.array(detection_boxes)
   non_max_detections = nms.non_max_suppression_fast(detection_boxes, 0.5)
-  print("Non max detections:", len(non_max_detections))
+  print("--> Non max detections:", len(non_max_detections))
 
   detections = []
   for x1, y1, x2, y2 in non_max_detections:
@@ -100,5 +99,5 @@ if __name__ == "__main__":
 
   util.print_report(ground_truth_dartboards, detections)
 
-  cv2.imwrite(f'out/labeled_{image_name}', image)
+  # cv2.imwrite(f'out/labeled_{image_name}', image)
   util.show_image(image)
