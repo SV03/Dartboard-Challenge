@@ -38,6 +38,7 @@ def print_report(ground_truth, detections, iou_threshold=0.5):
       iou = intersection_over_union(ground_truth_p1, ground_truth_p2, detected_p1, detected_p2)
       if(iou >= iou_threshold):
         succeded_detections += 1
+        break # stop evaluating detections for the ground truth
   
   print("True Positives:", succeded_detections)
   false_positives = number_of_detections - succeded_detections
