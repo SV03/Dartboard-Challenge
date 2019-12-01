@@ -9,6 +9,12 @@ import util
 import image_processing as ip
 import imutils
 
+def read_templates(names_list):
+  templates = []
+  for template_name in names_list:
+    templates.append(cv2.imread(template_name, 0))
+  return templates
+
 def match_template(image, template, method=cv2.TM_CCORR):
   result_image = cv2.matchTemplate(edged, template, cv2.TM_CCORR) 
   (_, max_val, _, max_loc) = cv2.minMaxLoc(result_image)
@@ -22,11 +28,14 @@ print(f"Opening {image_name}")
 image = cv2.imread(image_path)
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-# Read the template
-template = cv2.imread('templates/circle_dartboard.jpg', 0)
-template = cv2.resize(template, (60, 50))
-cv2.imwrite("templates/dart_circle.jpg", template)
-template_height, template_width = template.shape
+template_names = [
+  "templates/dart_circle.jpg",
+  "templates/dart_ellipsis0.jpg",
+  # "templates/dart_ellipsis1.jpg",
+  # "templates/dart_ellipsis2.jpg",
+  # "templates/dart_ellipsis3.jpg", 
+]
+templates = read_templates(template_names)
 
 max_found = None
 maximum_matches = []
@@ -43,26 +52,28 @@ for scale in np.linspace(lowest_scale, highest_scale, number_of_resizes)[::-1]:
   # keep track of the ratio of the resizing
   ratio = gray.shape[1] / float(resized.shape[1]) 
 
-  # if the resized image is smaller than the template, then break from the loop
-  if resized.shape[0] < template_height or resized.shape[1] < template_width: 
-    break
-
   edged  = cv2.Canny(resized, 50, 200)
-  max_val, max_loc = match_template(edged, template)
+  for template in templates:
+    template_height, template_width = template.shape
+    # if the resized image is smaller than the template, then break from the loop
+    if resized.shape[0] < template_height or resized.shape[1] < template_width: 
+      break
+
+    max_val, max_loc = match_template(edged, template)
   # if a new max_val is found we store it and update the max_found variable
-  if max_found is None or max_val > max_found[0]: 
-    print("New max:", max_val, max_loc)
-    max_found = (max_val, max_loc, ratio)
-    maximum_matches.append((max_val, max_loc, ratio))
+    if max_found is None or max_val > max_found[0]: 
+      max_found = (max_val, max_loc, ratio)
+      startX = int(max_loc[0] * ratio)
+      startY = int(max_loc[1] * ratio)
+      endX = int((max_loc[0] + template_width) * ratio)
+      endY = int((max_loc[1] + template_height) * ratio)
+      maximum_matches.append((max_val, (startX, startY), (endX, endY)))
+      print("New max:", max_val, (startX, startY), (endX, endY))
 
 print("Matches Found:", len(maximum_matches))
 
-for max_val, max_loc, ratio in maximum_matches:
-  startX = int(max_loc[0] * ratio)
-  startY = int(max_loc[1] * ratio)
-  endX = int((max_loc[0] + template_width) * ratio)
-  endY = int((max_loc[1] + template_height) * ratio)
-  cv2.rectangle(image, (startX, startY), (endX, endY), (255, 0, 0), 2)
+for max_val, top_left, bottom_right in maximum_matches:
+  cv2.rectangle(image, top_left, bottom_right, (255, 0, 0), 2)
 
 # for top_left, bottom_right in detections:
 #   cv2.rectangle(image, top_left, bottom_right, (0, 255, 0), 2)
